@@ -1,0 +1,1282 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Commande Client Ngwéa</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+
+  <style>
+
+    :root{
+      --bg:#f5f7f4;
+      --card:#ffffff;
+      --text:#1f241f;
+      --muted:#6f776f;
+      --accent:#2f6b4f;
+      --accent-dark:#24553f;
+      --accent-light:#dff0e5;
+      --border:#e4e7e3;
+      --danger:#d64040;
+      --shadow:0 20px 60px rgba(0,0,0,0.08);
+      --radius:26px;
+    }
+
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+    }
+
+    body{
+      font-family:'Inter',sans-serif;
+      background:linear-gradient(135deg,#f4f7f4 0%,#edf4ef 100%);
+      color:var(--text);
+      min-height:100vh;
+      overflow:hidden;
+    }
+
+    img{
+      max-width:100%;
+      display:block;
+    }
+
+    .background-glow{
+      position:fixed;
+      top:-180px;
+      right:-120px;
+      width:600px;
+      height:600px;
+      background:radial-gradient(circle, rgba(47,107,79,0.14) 0%, transparent 70%);
+      pointer-events:none;
+      z-index:0;
+    }
+
+    .app{
+      position:relative;
+      z-index:2;
+      width:100%;
+      height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+    }
+
+    .card{
+      width:100%;
+      max-width:860px;
+      min-height:620px;
+      background:rgba(255,255,255,0.88);
+      backdrop-filter:blur(12px);
+      border:1px solid rgba(255,255,255,0.6);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      position:relative;
+    }
+
+    .progress-wrapper{
+      width:100%;
+      height:6px;
+      background:#eef2ee;
+    }
+
+    .progress-bar{
+      width:0%;
+      height:100%;
+      background:linear-gradient(90deg,#2f6b4f,#55a36f);
+      transition:width .4s ease;
+    }
+
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:24px 32px 12px;
+    }
+
+    .logo{
+      width:120px;
+      object-fit:contain;
+    }
+
+    .welcome-logo{
+      width:180px;
+      margin-bottom:32px;
+      object-fit:contain;
+    }
+
+    .step-counter{
+      font-size:14px;
+      color:var(--muted);
+      font-weight:500;
+    }
+
+    .screen{
+      flex:1;
+      display:none;
+      padding:40px 60px 60px;
+      animation:fade .45s ease;
+    }
+
+    .screen.active{
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+    }
+
+    @keyframes fade{
+      from{
+        opacity:0;
+        transform:translateY(14px);
+      }
+      to{
+        opacity:1;
+        transform:translateY(0);
+      }
+    }
+
+    .welcome{
+      text-align:center;
+      align-items:center;
+    }
+
+    h1{
+      font-family:'Playfair Display',serif;
+      font-size:clamp(2.4rem,5vw,4rem);
+      line-height:1.1;
+      margin-bottom:18px;
+      color:#173326;
+    }
+
+    .subtitle{
+      font-size:1.1rem;
+      color:var(--muted);
+      line-height:1.7;
+      max-width:600px;
+      margin-bottom:40px;
+    }
+
+    .question-label{
+      font-family:'Playfair Display',serif;
+      font-size:clamp(1.9rem,4vw,3rem);
+      line-height:1.2;
+      margin-bottom:28px;
+      max-width:700px;
+      color:#163324;
+    }
+
+    .field{
+      width:100%;
+      border:none;
+      border-bottom:2px solid var(--border);
+      background:transparent;
+      padding:16px 0;
+      font-size:1.25rem;
+      color:var(--text);
+      outline:none;
+      transition:all .3s ease;
+      font-family:'Inter',sans-serif;
+    }
+
+    .field:focus{
+      border-color:var(--accent);
+    }
+
+    .field::placeholder{
+      color:#a2aaa3;
+    }
+
+    .select-field{
+      appearance:none;
+      cursor:pointer;
+    }
+
+    .options{
+      display:flex;
+      flex-direction:column;
+      gap:16px;
+      margin-top:10px;
+    }
+
+    .option{
+      position:relative;
+    }
+
+    .option input{
+      position:absolute;
+      opacity:0;
+      pointer-events:none;
+    }
+
+    .option label{
+      display:flex;
+      align-items:center;
+      gap:16px;
+      padding:20px 22px;
+      border-radius:18px;
+      border:2px solid var(--border);
+      background:white;
+      cursor:pointer;
+      transition:all .25s ease;
+      font-size:1.05rem;
+      font-weight:500;
+    }
+
+    .option label:hover{
+      transform:translateY(-2px);
+      border-color:#bdd2c3;
+    }
+
+    .option label::before{
+      content:"";
+      width:22px;
+      height:22px;
+      border-radius:50%;
+      border:2px solid #c9d0ca;
+      background:white;
+      transition:all .25s ease;
+      flex-shrink:0;
+    }
+
+    .option input:checked + label{
+      border-color:var(--accent);
+      background:var(--accent-light);
+      color:#163324;
+    }
+
+    .option input:checked + label::before{
+      border-color:var(--accent);
+      background:var(--accent);
+      box-shadow:inset 0 0 0 5px white;
+    }
+
+    .hidden{
+      display:none;
+    }
+
+    .actions{
+      margin-top:48px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      flex-wrap:wrap;
+    }
+
+    .hint{
+      color:var(--muted);
+      font-size:0.95rem;
+    }
+
+    .btn{
+      border:none;
+      border-radius:16px;
+      padding:16px 28px;
+      cursor:pointer;
+      font-family:'Inter',sans-serif;
+      font-size:1rem;
+      font-weight:600;
+      transition:all .25s ease;
+    }
+
+    .btn-primary{
+      background:var(--accent);
+      color:white;
+      box-shadow:0 10px 25px rgba(47,107,79,0.24);
+    }
+
+    .btn-primary:hover{
+      background:var(--accent-dark);
+      transform:translateY(-2px);
+    }
+
+    .btn-secondary{
+      background:transparent;
+      border:1px solid var(--border);
+      color:var(--muted);
+    }
+
+    .btn-secondary:hover{
+      background:#f3f5f3;
+    }
+
+    .error{
+      margin-top:18px;
+      color:var(--danger);
+      font-size:0.95rem;
+      display:none;
+    }
+
+    .success-screen{
+      text-align:center;
+      align-items:center;
+    }
+
+    .success-icon{
+      width:90px;
+      height:90px;
+      border-radius:50%;
+      background:var(--accent-light);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      margin-bottom:28px;
+      font-size:2.5rem;
+      color:var(--accent);
+    }
+
+    .success-text{
+      font-size:1.2rem;
+      line-height:1.8;
+      color:var(--muted);
+      max-width:560px;
+    }
+
+    .loading{
+      opacity:.7;
+      pointer-events:none;
+    }
+
+    @media(max-width:768px){
+
+      body{
+        overflow:auto;
+      }
+
+      .card{
+        min-height:100vh;
+        border-radius:0;
+      }
+
+      .screen{
+        padding:30px 24px 40px;
+      }
+
+      .topbar{
+        padding:20px 20px 10px;
+      }
+
+      .logo{
+        width:100px;
+      }
+
+      .welcome-logo{
+        width:150px;
+      }
+
+      .question-label{
+        font-size:2rem;
+      }
+
+      .field{
+        font-size:1.1rem;
+      }
+
+      .option label{
+        padding:18px;
+      }
+
+      .actions{
+        flex-direction:column;
+        align-items:stretch;
+      }
+
+      .btn{
+        width:100%;
+      }
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <div class="background-glow"></div>
+
+  <div class="app">
+
+    <div class="card">
+
+      <!-- Progression -->
+      <div class="progress-wrapper">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+
+      <!-- Header -->
+      <div class="topbar">
+
+        <!-- IMPORTANT :
+             Place le fichier logo ici :
+             /assets/logo-ngwea.png
+        -->
+
+        <img
+          src="assets/logo-ngwea.png"
+          alt="Logo Ngwéa"
+          class="logo"
+        >
+
+        <div class="step-counter" id="stepCounter">
+          Bienvenue
+        </div>
+
+      </div>
+
+      <!-- Écran d'accueil -->
+      <section class="screen active welcome" id="welcomeScreen">
+
+        <img
+          src="assets/logo-ngwea.png"
+          alt="Logo Ngwéa"
+          class="welcome-logo"
+        >
+
+        <h1>Commande Client Ngwéa</h1>
+
+        <p class="subtitle">
+          Quelques informations suffisent pour lancer votre demande de transport.
+          Une expérience fluide, rapide et sans friction.
+        </p>
+
+        <button class="btn btn-primary" id="startBtn">
+          Commencer →
+        </button>
+
+      </section>
+
+      <!-- FORMULAIRE -->
+      <form id="onboardingForm">
+
+        <!-- Q1 -->
+        <section class="screen question-screen">
+
+          <h2 class="question-label">
+            Quel est votre nom ?
+          </h2>
+
+          <input
+            type="text"
+            class="field"
+            name="nom_client"
+            placeholder="Votre nom complet"
+            required
+          >
+
+          <div class="error">
+            Veuillez renseigner ce champ.
+          </div>
+
+          <div class="actions">
+            <span class="hint">Appuyez sur Entrée pour continuer</span>
+
+            <button type="button" class="btn btn-primary next-btn">
+              Continuer
+            </button>
+          </div>
+
+        </section>
+
+        <!-- Q2 -->
+        <section class="screen question-screen">
+
+          <h2 class="question-label">
+            Votre numéro WhatsApp ?
+          </h2>
+
+          <input
+            type="tel"
+            class="field"
+            name="numero_whatsapp"
+            placeholder="+221 XX XXX XX XX"
+            required
+          >
+
+          <div class="error">
+            Veuillez renseigner ce champ.
+          </div>
+
+          <div class="actions">
+
+            <button type="button" class="btn btn-secondary prev-btn">
+              Retour
+            </button>
+
+            <button type="button" class="btn btn-primary next-btn">
+              Continuer
+            </button>
+
+          </div>
+
+        </section>
+
+        <!-- Q3 -->
+        <section class="screen question-screen">
+
+          <h2 class="question-label">
+            Quel est le type de marchandise ?
+          </h2>
+
+          <input
+            type="text"
+            class="field"
+            name="type_marchandise"
+            placeholder="Ex : ciment, boissons, équipements..."
+            required
+          >
+
+          <div class="error">
+            Veuillez renseigner ce champ.
+          </div>
+
+          <div class="actions">
+
+            <button type="button" class="btn btn-secondary prev-btn">
+              Retour
+            </button>
+
+            <button type="button" class="btn btn-primary next-btn">
+              Continuer
+            </button>
+
+          </div>
+
+        </section>
+
+        <!-- Q4 -->
+        <section class="screen question-screen">
+
+          <h2 class="question-label">
+            Type de conditionnement ?
+          </h2>
+
+          <select
+            class="field select-field"
+            name="type_conditionnement"
+            required
+          >
+            <option value="">Sélectionner une option</option>
+            <option>Sac</option>
+            <option>Palette</option>
+            <option>Carton</option>
+            <option>Vrac</option>
+            <option>Conteneur</option>
+            <option>Autre</option>
+          </select>
+
+          <div class="error">
+            Veuillez sélectionner une option.
+          </div>
+
+          <div class="actions">
+
+            <button type="button" class="btn btn-secondary prev-btn">
+              Retour
+            </button>
+
+            <button type="button" class="btn btn-primary next-btn">
+              Continuer
+            </button>
+
+          </div>
+
+        </section>
+
+        <!-- Q5 -->
+        <section class="screen question-screen">
+
+          <h2 class="question-label">
+            Quel est le tonnage estimé ?
+          </h2>
+
+          <input
+            type="number"
+            class="field"
+            name="tonnage_estime"
+            placeholder="Ex : 25"
+            required
+          >
+
+          <div class="error">
+            Veuillez renseigner ce champ.
+          </div>
+
+          <div class="actions">
+
+            <button type="button" class="btn btn-secondary prev-btn">
+              Retour
+            </button>
+
+            <button type="button" class="btn btn-primary next-btn">
+              Continuer
+            </button>
+
+          </div>
+
+        </section>
+
+        <!-- Q6 -->
+        <section class="screen question-screen">
+
+          <h2 class="question-label">
+            Lieu exact de chargement ?
+          </h2>
+
+          <input
+            type="text"
+            class="field"
+            name="lieu_chargement"
+            placeholder="Ville, quartier, adresse..."
+            required
+          >
+
+          <div class="error">
+            Veuillez renseigner ce champ.
+          </div>
+
+          <div class="actions">
+
+            <button type="button" class="btn btn-secondary prev-btn">
+              Retour
+            </button>
+
+            <button type="button" class="btn btn-primary next-btn">
+              Continuer
+            </button>
+
+          </div>
+
+        </section>
+
+        <!-- Q7 -->
+        <section class="screen question-screen">
+
+          <h2 class="question-label">
+            Lieu exact de déchargement ?
+          </h2>
+
+          <input
+            type="text"
+            class="field"
+            name="lieu_dechargement"
+            placeholder="Ville, quartier, adresse..."
+            required
+          >
+
+          <div class="error">
+            Veuillez renseigner ce champ.
+          </div>
+
+          <div class="actions">
+
+            <button type="button" class="btn btn-secondary prev-btn">
+              Retour
+            </button>
+
+            <button type="button" class="btn btn-primary next-btn">
+              Continuer
+            </button>
+
+          </div>
+
+        </section>
+
+        <!-- Q8 -->
+        <section class="screen question-screen">
+
+          <h2 class="question-label">
+            Quelle est la date de chargement ?
+          </h2>
+
+          <input
+            type="date"
+            class="field"
+            name="date_chargement"
+            required
+          >
+
+          <div class="error">
+            Veuillez renseigner ce champ.
+          </div>
+
+          <div class="actions">
+
+            <button type="button" class="btn btn-secondary prev-btn">
+              Retour
+            </button>
+
+            <button type="button" class="btn btn-primary next-btn">
+              Continuer
+            </button>
+
+          </div>
+
+        </section>
+
+        <!-- Q9 -->
+        <section class="screen question-screen">
+
+          <h2 class="question-label">
+            Quel est votre budget estimatif ?
+          </h2>
+
+          <div class="options">
+
+            <div class="option">
+
+              <input
+                type="radio"
+                id="budgetFixe"
+                name="budget_type"
+                value="Montant fixe"
+                required
+              >
+
+              <label for="budgetFixe">
+                Montant fixe
+              </label>
+
+            </div>
+
+            <div id="budgetFieldWrapper" class="hidden">
+
+              <input
+                type="number"
+                class="field"
+                id="budgetAmount"
+                name="montant_budget_fcfa"
+                placeholder="Précisez le montant en FCFA"
+              >
+
+            </div>
+
+            <div class="option">
+
+              <input
+                type="radio"
+                id="budgetDevis"
+                name="budget_type"
+                value="Demande de devis"
+              >
+
+              <label for="budgetDevis">
+                Demande de devis
+              </label>
+
+            </div>
+
+          </div>
+
+          <div class="error">
+            Veuillez sélectionner une option.
+          </div>
+
+          <div class="actions">
+
+            <button type="button" class="btn btn-secondary prev-btn">
+              Retour
+            </button>
+
+            <button type="button" class="btn btn-primary next-btn">
+              Continuer
+            </button>
+
+          </div>
+
+        </section>
+
+        <!-- Q10 -->
+        <section class="screen question-screen">
+
+          <h2 class="question-label">
+            Quelles sont les modalités de paiement ?
+          </h2>
+
+          <div class="options">
+
+            <div class="option">
+
+              <input
+                type="radio"
+                id="avance"
+                name="modalites_paiement"
+                value="Avance au chargement (>=60%)"
+                required
+              >
+
+              <label for="avance">
+                Avance au chargement (>=60%)
+              </label>
+
+            </div>
+
+            <div class="option">
+
+              <input
+                type="radio"
+                id="totalite"
+                name="modalites_paiement"
+                value="Totalité au chargement"
+              >
+
+              <label for="totalite">
+                Totalité au chargement
+              </label>
+
+            </div>
+
+          </div>
+
+          <div class="error">
+            Veuillez sélectionner une option.
+          </div>
+
+          <div class="actions">
+
+            <button type="button" class="btn btn-secondary prev-btn">
+              Retour
+            </button>
+
+            <button type="button" class="btn btn-primary next-btn">
+              Continuer
+            </button>
+
+          </div>
+
+        </section>
+
+        <!-- Q11 -->
+        <section class="screen question-screen">
+
+          <h2 class="question-label">
+            Quel sera le mode de paiement ?
+          </h2>
+
+          <div class="options">
+
+            <div class="option">
+
+              <input
+                type="radio"
+                id="cash"
+                name="mode_paiement"
+                value="Cash"
+                required
+              >
+
+              <label for="cash">
+                Cash
+              </label>
+
+            </div>
+
+            <div class="option">
+
+              <input
+                type="radio"
+                id="virement"
+                name="mode_paiement"
+                value="Virement bancaire"
+              >
+
+              <label for="virement">
+                Virement bancaire
+              </label>
+
+            </div>
+
+          </div>
+
+          <div class="error">
+            Veuillez sélectionner une option.
+          </div>
+
+          <div class="actions">
+
+            <button type="button" class="btn btn-secondary prev-btn">
+              Retour
+            </button>
+
+            <button
+              type="submit"
+              class="btn btn-primary"
+              id="submitBtn"
+            >
+              Envoyer la demande
+            </button>
+
+          </div>
+
+        </section>
+
+      </form>
+
+      <!-- SUCCÈS -->
+      <section class="screen success-screen" id="successScreen">
+
+        <div class="success-icon">
+          ✓
+        </div>
+
+        <h1>Merci !</h1>
+
+        <p class="success-text">
+          Vos informations ont bien été transmises.<br><br>
+          Délai de prise en charge 30 à 120 minutes.
+        </p>
+
+      </section>
+
+    </div>
+
+  </div>
+
+  <script>
+
+    // =========================
+    // CONFIG
+    // =========================
+
+    const FORMSPREE_URL = "https://formspree.io/f/xojbarqq";
+
+    // =========================
+    // ELEMENTS
+    // =========================
+
+    const welcomeScreen = document.getElementById("welcomeScreen");
+    const successScreen = document.getElementById("successScreen");
+    const questionScreens = document.querySelectorAll(".question-screen");
+
+    const progressBar = document.getElementById("progressBar");
+    const stepCounter = document.getElementById("stepCounter");
+
+    const startBtn = document.getElementById("startBtn");
+
+    const form = document.getElementById("onboardingForm");
+
+    let currentStep = -1;
+
+    // =========================
+    // START
+    // =========================
+
+    startBtn.addEventListener("click", () => {
+
+      welcomeScreen.classList.remove("active");
+
+      currentStep = 0;
+
+      showStep(currentStep);
+
+    });
+
+    // =========================
+    // SHOW STEP
+    // =========================
+
+    function showStep(index){
+
+      questionScreens.forEach(screen => {
+        screen.classList.remove("active");
+      });
+
+      questionScreens[index].classList.add("active");
+
+      const progress =
+        ((index + 1) / questionScreens.length) * 100;
+
+      progressBar.style.width = `${progress}%`;
+
+      stepCounter.innerText =
+        `Question ${index + 1} sur ${questionScreens.length}`;
+
+      const input =
+        questionScreens[index].querySelector("input, select");
+
+      if(input){
+        setTimeout(() => {
+          input.focus();
+        }, 200);
+      }
+
+    }
+
+    // =========================
+    // VALIDATION
+    // =========================
+
+    function validateStep(step){
+
+      const screen = questionScreens[step];
+
+      const inputs =
+        screen.querySelectorAll("input, select");
+
+      const error =
+        screen.querySelector(".error");
+
+      let valid = true;
+
+      inputs.forEach(input => {
+
+        if(input.type === "radio"){
+
+          const radios =
+            screen.querySelectorAll(
+              `input[name="${input.name}"]`
+            );
+
+          const checked =
+            [...radios].some(r => r.checked);
+
+          if(!checked){
+            valid = false;
+          }
+
+        } else {
+
+          if(
+            input.hasAttribute("required")
+            &&
+            !input.value.trim()
+          ){
+            valid = false;
+          }
+
+        }
+
+      });
+
+      // Budget dynamique
+
+      const budgetFixe =
+        document.getElementById("budgetFixe");
+
+      const budgetAmount =
+        document.getElementById("budgetAmount");
+
+      if(step === 8 && budgetFixe.checked){
+
+        if(!budgetAmount.value.trim()){
+          valid = false;
+        }
+
+      }
+
+      error.style.display =
+        valid ? "none" : "block";
+
+      return valid;
+
+    }
+
+    // =========================
+    // NEXT BUTTONS
+    // =========================
+
+    document.querySelectorAll(".next-btn")
+      .forEach(btn => {
+
+        btn.addEventListener("click", () => {
+
+          if(validateStep(currentStep)){
+
+            currentStep++;
+
+            if(currentStep < questionScreens.length){
+              showStep(currentStep);
+            }
+
+          }
+
+        });
+
+      });
+
+    // =========================
+    // PREVIOUS BUTTONS
+    // =========================
+
+    document.querySelectorAll(".prev-btn")
+      .forEach(btn => {
+
+        btn.addEventListener("click", () => {
+
+          currentStep--;
+
+          if(currentStep >= 0){
+            showStep(currentStep);
+          }
+
+        });
+
+      });
+
+    // =========================
+    // KEYBOARD NAVIGATION
+    // =========================
+
+    document.addEventListener("keydown", (e) => {
+
+      if(currentStep < 0) return;
+
+      if(e.key === "Enter"){
+
+        e.preventDefault();
+
+        if(currentStep === questionScreens.length - 1){
+
+          if(validateStep(currentStep)){
+            form.requestSubmit();
+          }
+
+        } else {
+
+          if(validateStep(currentStep)){
+
+            currentStep++;
+
+            showStep(currentStep);
+
+          }
+
+        }
+
+      }
+
+    });
+
+    // =========================
+    // BUDGET DYNAMIQUE
+    // =========================
+
+    const budgetFixe =
+      document.getElementById("budgetFixe");
+
+    const budgetDevis =
+      document.getElementById("budgetDevis");
+
+    const budgetFieldWrapper =
+      document.getElementById("budgetFieldWrapper");
+
+    const budgetAmount =
+      document.getElementById("budgetAmount");
+
+    budgetFixe.addEventListener("change", () => {
+
+      if(budgetFixe.checked){
+
+        budgetFieldWrapper.classList.remove("hidden");
+
+        budgetAmount.required = true;
+
+      }
+
+    });
+
+    budgetDevis.addEventListener("change", () => {
+
+      if(budgetDevis.checked){
+
+        budgetFieldWrapper.classList.add("hidden");
+
+        budgetAmount.required = false;
+
+        budgetAmount.value = "";
+
+      }
+
+    });
+
+    // =========================
+    // SUBMIT ASYNC
+    // =========================
+
+    form.addEventListener("submit", async (e) => {
+
+      e.preventDefault();
+
+      if(!validateStep(currentStep)){
+        return;
+      }
+
+      const submitBtn =
+        document.getElementById("submitBtn");
+
+      submitBtn.innerText =
+        "Envoi en cours...";
+
+      submitBtn.classList.add("loading");
+
+      try{
+
+        const formData =
+          new FormData(form);
+
+        const response = await fetch(
+          FORMSPREE_URL,
+          {
+            method:"POST",
+            body:formData,
+            headers:{
+              "Accept":"application/json"
+            }
+          }
+        );
+
+        if(response.ok){
+
+          form.style.display = "none";
+
+          questionScreens.forEach(screen => {
+            screen.classList.remove("active");
+          });
+
+          stepCounter.innerText =
+            "Confirmation";
+
+          progressBar.style.width = "100%";
+
+          successScreen.classList.add("active");
+
+        } else {
+
+          alert(
+            "Une erreur est survenue lors de l'envoi."
+          );
+
+          submitBtn.innerText =
+            "Envoyer la demande";
+
+          submitBtn.classList.remove("loading");
+
+        }
+
+      } catch(error){
+
+        alert(
+          "Connexion impossible. Vérifiez votre réseau."
+        );
+
+        submitBtn.innerText =
+          "Envoyer la demande";
+
+        submitBtn.classList.remove("loading");
+
+      }
+
+    });
+
+  </script>
+
+</body>
+</html>
